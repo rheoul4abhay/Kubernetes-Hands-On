@@ -1,0 +1,87 @@
+Kubernetes or K8s
+
+A container orchestration technology that manages and deploys thousands of containers in a cluster.
+
+kubectl is the command line utility to interact with kubernetes cluster
+
+COMMANDS:
+
+kubectl run <name> -> run an application in the cluster
+
+kubectl cluter-info -> to get info about the cluster
+
+kubectl get nodes -> to list all of the nodes that are parts of the cluster
+
+kubernetes run nginx --image nginx -> this command will create a container inside a pod named nginx, we have to specify image name with the help of --image flag
+
+kubectl get pods -> helps us see the list of pods in our cluster
+
+kubectl describe pod nginx -> to show detailed information about a specified pod (any pod name in place of nginx)
+
+kubectl get pods -o wide -> show additional information such as the node in which the pod is running
+
+kubectl create deployment nginx --image=nginx -> To create a deployment
+
+
+Using Manifest-file/YAML file to create pods, services, deployments etc
+kubectl create -f (<name>.yml) -> to create pods,services,etc from manifest file (yml file)
+
+kubectl delete pod <pod_name> -> to delete a pod
+
+kubectl edit replicaset <replicaset_name> : to edit an already running replicaset object
+
+kubectl delete replicaset <replicaset_name> : to delete a replicaset
+
+kubectl get replicaSets or replicaset -> to see the current running replicaset
+kubectl scale replicaset <replicaset_name> --replicas=3 (or any number) -> to scale up or down the replicas to specified replicas count
+
+kubectl get all -> to get the list of all kubernetes objects (pods, services, replicaset, deployments, etc)
+
+kubectl delete all --all -> To delete all the resources in the current namespace (i.e to remove all the kubernetes objects)
+
+kubectl get deployments -> to list all the deployment objects in kubernetes
+
+kubectl describe deployment <deployment_name> : To show info about a deployment such as images used etc...
+
+kubectl delete deployment <deployment_name> : To delete a deployment
+
+# Rollout and Rollback in deployment
+
+STEP BY STEP
+Step 1: CREATE
+kubectl create (or apply) -f <deployment_file> -> To create a deployment object in kubernetes
+
+Step 2: UPDATE
+kubectl set image deployment/myapp-deployment nginx=nginx:1.9.1
+
+Step 3: Check STATUS and HISTORY
+kubectl rollout status deployment/myapp-deployment
+kubectl rollout history deployment/myapp-deployment
+
+Step 4: ROLLBACK To Previous Version
+kubectl rollout undo deployment/myapp-deployment
+
+kubectl create -f <yaml_manifest> --record=True : It helps in tracking the history of changes to a Deployment.
+
+kubectl set image deployment/<deployment_name> <container_name>=<new_image_value> - To update the image of an container in order to upgrade our application
+(ALTERNATIVE: directly change the manifest file)
+
+
+NETWORKING IN KUBERNETES
+
+There are 3 main type of IPs in kubernetes network:
+
+1. Node IP
+2. Pod IP
+3. Cluster IP
+
+SERVICES IN KUBERNETES
+
+Service in kubernetes is a object whose usecase is to listen to a port in a node and forward the request on that port to a port on the pod running the web application. This type of service is known as the node port service. 
+
+Types of services:
+1) NodePort service: service makes an internal pod accessible to the port on the node 
+2) ClusterIP: In this, the service creates an internal IP inside a cluster to enable connection between the services such as frontend server with backend server
+3) LoadBalancer: 
+
+kubectl port-forward svc/<service_name> <required_port>:<service_port>
