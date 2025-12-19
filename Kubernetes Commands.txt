@@ -1,3 +1,127 @@
+External Client → NodePort (optional) → Service port → targetPort → containerPort → App
+
+How Deployments behave
+
+Pods in a Deployment are anonymous and interchangeable.
+If a pod crashes or the node fails:
+
+Kubernetes deletes the old pod and creates a new one with a different name (e.g., mysql-abc123 → mysql-xyz789).
+
+
+If you attach a PVC manually:
+
+You can bind it to the Deployment, but all pods share the same PVC (bad for scaling).
+If you try to create multiple PVCs for multiple pods, you must manage them manually because Deployment doesn’t know which PVC belongs to which pod.
+
+
+
+Result:
+
+Pod identity changes → DNS changes → replication breaks.
+PVC binding is not guaranteed per pod → risk of wrong data attached.
+
+
+How StatefulSets behave
+
+Pods have stable names (mysql-0, mysql-1).
+Each pod gets its own PVC automatically via volumeClaimTemplates.
+If mysql-0 crashes:
+
+Kubernetes recreates mysql-0 (same name, same PVC).
+
+
+DNS stays predictable: mysql-0.mysql.default.svc.cluster.local.
+
+Result:
+
+Identity is stable → replication works.
+Storage binding is automatic and correct → data integrity preserved.
+
+ARCHITECTURE FLOW OF KUBERNETES
+
+✅ Example Scenario: Deploying a Pod via Deployment
+
+1. kubectl (Client) → API Server
+
+You run:
+Shellkubectl apply -f deployment.yamlShow more lines
+
+Role: kubectl sends the desired state (Deployment manifest) to the API Server via REST.
+
+
+2. API Server → etcd
+
+API Server validates the request and stores the Deployment object in etcd (the cluster’s source of truth).
+Role: API Server = front door for all requests; etcd = persistent store for cluster state.
+
+
+3. Controller Manager (Deployment Controller)
+
+Watches etcd for new Deployment objects.
+Sees:
+Desired: 3 replicas
+Actual: 0
+
+
+Creates ReplicaSet, which then creates 3 Pod objects (state = Pending).
+Role: Controllers reconcile desired vs actual state.
+
+
+4. Scheduler
+
+Watches for Pending Pods (no Node assigned).
+Picks a suitable Node for each Pod based on:
+
+Resource availability (CPU, memory)
+Node affinity/taints
+Scheduling policies
+
+
+Updates Pod spec with nodeName.
+Role: Decides where Pods run.
+
+
+5. Kubelet (on each Node)
+
+Watches API Server for Pods assigned to its Node.
+Pulls container image from registry.
+Creates containers via Container Runtime (e.g., containerd).
+Reports Pod status back to API Server.
+Role: Ensures containers run on the Node.
+
+
+6. Container Runtime
+
+Actually runs the containers inside the Pod.
+Handles networking and storage setup.
+Role: Executes containers.
+
+
+7. kube-proxy
+
+Updates iptables or IPVS rules for Services.
+Ensures traffic can reach Pods via ClusterIP, NodePort, etc.
+Role: Networking for Services.
+
+
+8. Continuous Sync
+
+Controller Manager keeps watching:
+
+If a Pod crashes → creates a new Pod.
+Scheduler assigns again.
+
+
+Role: Self-healing loop.
+
+
+🔍 Visual Flow Summary:
+kubectl → API Server → etcd → Controller → Scheduler → Kubelet → Container Runtime → kube-proxy
+
+
+✅ This is the core Kubernetes control loop:
+Declarative desired state → stored in etcd → controllers reconcile → scheduler places → kubelet runs → runtime executes → networking via kube-proxy.
+
 Kubernetes or K8s
 
 A container orchestration technology that manages and deploys thousands of containers in a cluster.
