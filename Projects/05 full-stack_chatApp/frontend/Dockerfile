@@ -2,7 +2,7 @@
 FROM node:18-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 COPY . .
 RUN npm run build
 
@@ -24,5 +24,4 @@ RUN chown -R nginx:nginx /usr/share/nginx/html
 EXPOSE 80
 
 # Serve application on nginx
-CMD ["nginx", "-g", "daemon off"]
-
+CMD ["nginx", "-g", "daemon off;"]

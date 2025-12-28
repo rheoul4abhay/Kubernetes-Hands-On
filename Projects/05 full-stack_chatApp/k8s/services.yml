@@ -1,0 +1,44 @@
+# Frontend service
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: chat-app
+spec:
+  selector:
+    app: frontend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  
+
+# Backend service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: chat-app
+spec:
+  selector:
+    app: backend
+  ports:
+  - protocol: TCP
+    port: 5001
+    targetPort: 5001
+
+# MongoDB service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+  namespace: chat-app
+spec:
+  selector:
+    app: mongodb
+  ports:
+  - protocol: TCP
+    port: 27017 # default port for mongodb
+    targetPort: 27017
